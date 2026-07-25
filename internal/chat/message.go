@@ -1,6 +1,14 @@
 package chat
 
+type Role string
+
+const (
+	RoleSystem     Role = "system"
+	RoleUser       Role = "user"
+	RoleAssistant  Role = "assistant"
+)
+
 type Message struct {
-	Role string
-	Content string
+	Role     Role
+	Content  string
 }

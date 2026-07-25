@@ -6,8 +6,10 @@ import (
 )
 
 type Agent struct {
-	llm     *llm.Client
-	history []chat.Message
+	llm            *llm.Client
+	history        []chat.Message
+	memory         *memory.Memory
+	systemPrompt   string
 }
 
 
@@ -15,22 +17,47 @@ func New(llm *llm.Client) *Agent {
 	return &Agent{
 		llm: llm,
 		history: []chat.Message{},
+		systemPrompt: `You are Pi, a warm, thoughtful, and emotionally intelligent AI assistant.
+
+Keep your responses natural and conversational.
+
+Be concise unless the user asks for more detail.`,
 	}
 }
 
+func (a *Agent) buildSystemPrompt() string {
+	prompt := a.systemPrompt
+
+	for key, value := range a.memory.All() {
+		prompt += "\n" + key + ": " + value
+	}
+
+	return prompt
+
+}
+
 func (a *Agent) Respond(message string) (string, error) {
-	a.history = append(a.history , chat.Message{
-		Role: "user",
+	a.history = append(a.history, chat.Message{
+		Role:    chat.RoleUser,
 		Content: message,
 	})
 
-	reply, err := a.llm.Generate(a.history)
+	messages := []chat.Message{
+		{
+			Role: chat.RoleSystem,
+			Content:  a.buildSystemPrompt(),
+		},
+	}
+
+	messages = append(messages, a.history...)
+	
+	reply, err := a.llm.Generate(messages)
 	if err != nil{
 		return "",err
 	}
 
 	a.history = append(a.history, chat.Message {
-		Role: "assistant",
+		Role: chat.RoleAssistant,
 		Content: reply,
 	})
 
