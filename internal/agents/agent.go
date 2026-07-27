@@ -3,6 +3,7 @@ package agent
 import (
 	"github.com/sanskritisingh/pi-agent/internal/chat"
 	"github.com/sanskritisingh/pi-agent/internal/llm"
+	"github.com/sanskritisingh/pi-agent/internal/memory"
 )
 
 type Agent struct {
@@ -15,8 +16,9 @@ type Agent struct {
 
 func New(llm *llm.Client) *Agent {
 	return &Agent{
-		llm: llm,
+		llm:     llm,
 		history: []chat.Message{},
+		memory:  memory.New(),
 		systemPrompt: `You are Pi, a warm, thoughtful, and emotionally intelligent AI assistant.
 
 Keep your responses natural and conversational.
@@ -37,6 +39,12 @@ func (a *Agent) buildSystemPrompt() string {
 }
 
 func (a *Agent) Respond(message string) (string, error) {
+	facts := memory.Extract(message)
+
+	for key, value := range facts {
+		a.memory.Remember(key, value)
+	}
+	
 	a.history = append(a.history, chat.Message{
 		Role:    chat.RoleUser,
 		Content: message,
