@@ -5,17 +5,16 @@ type Memory struct {
 }
 
 func New() *Memory {
-	memory: memory.New(),
 	return &Memory{
 		facts: make(map[string]string),
 	}
 }
 
-func (m *Memory) Remember(key, value string){
+func (m *Memory) Remember(key, value string) {
 	m.facts[key] = value
 }
 
-func (m *Memory) Recall(key string) (string, bool){
+func (m *Memory) Recall(key string) (string, bool) {
 	value, ok := m.facts[key]
 	return value, ok
 }
