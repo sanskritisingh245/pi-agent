@@ -20,7 +20,10 @@ func main() {
 		cfg.Model,
 	)
 
-	agent := agent.New(client)
+	agent, err := agent.New(client)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	reader := bufio.NewReader(os.Stdin)
 
