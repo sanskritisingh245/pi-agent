@@ -45,7 +45,10 @@ func (a *Agent) buildSystemPrompt() string {
 }
 
 func (a *Agent) Respond(message string) (string, error) {
-	facts := memory.Extract(message)
+	facts, err := a.llm.ExtractFacts(message)
+	if err != nil {
+		return "", err
+	}
 
 	for key, value := range facts {
 		a.memory.Remember(key, value)
